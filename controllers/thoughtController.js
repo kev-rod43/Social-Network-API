@@ -2,7 +2,7 @@ const { ObjectId } = require('mongoose').Types;
 const { User, Thought } = require('../models');
 
 module.exports = {
-    async getThought(req, res) {
+    async getThoughts(req, res) {
         try {
             const thoughts = await Thought.find();
             res.json(thoughts);
@@ -61,7 +61,7 @@ module.exports = {
                 "userId": "5edff358a0fcb779aa7b118b"
             } */
         try {
-            const thought = await Thought.findOneAndUpdate({ _id: req.params.thoughtId }, req.body);
+            const thought = await Thought.findOneAndUpdate({ _id: req.params.thoughtId }, req.body, {new: true});
 
             if (!thought) {
                 return res.status(404).json({
@@ -118,37 +118,8 @@ module.exports = {
                     $push: {
                         reactions: req.body
                     }
-                });
-
-            if (!thought) {
-                return res.status(404).json({
-                    message: 'No thought matched that ID',
-                });
-            }
-
-            res.status(200).json(thought);
-        } catch (err) {
-            console.log(err);
-            res.status(500).json(err)
-        }
-    },
-    
-    async createReaction(req, res) {
-        /*
-        req.body should look like this:
-        {
-            reactionBody: String,
-            username: String,
-        }
-        */
-        try {
-            const thought = await Thought.findOneAndUpdate(
-                { _id: req.params.thoughtId },
-                {
-                    $push: {
-                        reactions: req.body
-                    }
-                });
+                },
+                {new: true});
 
             if (!thought) {
                 return res.status(404).json({
@@ -164,21 +135,15 @@ module.exports = {
     },
 
     async deleteReaction(req, res) {
-        /*
-        req.body should look like this:
-        {
-            reactionBody: String,
-            username: String,
-        }
-        */
         try {
             const thought = await Thought.findOneAndUpdate(
                 { _id: req.params.thoughtId },
                 {
                     $pull: {
-                        reactions: req.params.reactionId
+                        reactions: {reactionId: new ObjectId(req.params.reactionId)}
                     }
-                });
+                },
+                {new: true});
 
             if (!thought) {
                 return res.status(404).json({

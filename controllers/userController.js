@@ -1,5 +1,5 @@
-const { User, Thought } = require('../models');
-const { ObjectId } = require('mongoose').Types;
+const { User } = require('../models');
+
 
 module.exports = {
     async getUsers(req, res) {
@@ -42,10 +42,10 @@ module.exports = {
             res.status(500).json(err);
         }
     },
-    
+
     async updateUser(req, res) {
         try {
-            const user = await User.findOneAndUpdate({ _id: req.params.userId }, req.body)
+            const user = await User.findOneAndUpdate({ _id: req.params.userId }, req.body, { new: true })
             if (!user) {
                 return res.status(404).json({ message: 'No user with that ID' });
             }
@@ -88,12 +88,12 @@ module.exports = {
             res.status(500).json(err);
         }
     },
-    
+
     async removeFriend(req, res) {
         try {
             const user = await User.findOneAndUpdate(
                 { _id: req.params.userId },
-                { $pull: { friends: { friendId: req.params.friendId } } },
+                { $pull: { friends: req.params.friendId  } },
                 { runValidators: true, new: true }
             );
 
